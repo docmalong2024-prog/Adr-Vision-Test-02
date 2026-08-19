@@ -1,0 +1,49 @@
+package com.adrvision.app.presentation
+
+import android.graphics.RectF
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class DetectedBox(
+    val id: Int,
+    val label: String,
+    val confidence: Float,
+    val boundingBox: RectF,
+    val color: Long = 0xFF00E5FF
+)
+
+data class MathResultState(
+    val rawText: String = "",
+    val result: String = "",
+    val executionTimeMs: Long = 0
+)
+
+data class VisionUiState(
+    val isTracking: Boolean = true,
+    val fps: Int = 60,
+    val inferenceTimeMs: Long = 11,
+    val objects: List<DetectedBox> = emptyList(),
+    val mathResult: MathResultState? = null,
+    val isFrontCamera: Boolean = false,
+    val confidenceThreshold: Float = 0.5f
+)
+
+class VisionViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(VisionUiState())
+    val uiState: StateFlow<VisionUiState> = _uiState.asStateFlow()
+
+    fun updateDetections(boxes: List<DetectedBox>, inferenceTime: Long) {
+        _uiState.update { it.copy(objects = boxes, inferenceTimeMs = inferenceTime) }
+    }
+
+    fun toggleCameraLens() {
+        _uiState.update { it.copy(isFrontCamera = !it.isFrontCamera) }
+    }
+
+    fun updateConfidenceThreshold(value: Float) {
+        _uiState.update { it.copy(confidenceThreshold = value) }
+    }
+}
