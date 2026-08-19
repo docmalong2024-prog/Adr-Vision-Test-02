@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.AdrVision" parent="android:Theme.Material.NoActionBar" />
+</resources>
