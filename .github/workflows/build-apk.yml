@@ -18,12 +18,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Auto Unzip Project if ZIP exists
+    - name: Auto Unzip if ZIP exists
       run: |
         if ls *.zip 1> /dev/null 2>&1; then
-          echo "Tìm thấy file zip, đang tự động giải nén..."
+          echo "Tìm thấy file zip, đang giải nén..."
           unzip -o -q "*.zip" -d . || true
         fi
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
@@ -31,10 +34,14 @@ jobs:
         gradle-version: '8.9'
 
     - name: Build APK with Gradle
-      run: gradle assembleDebug --stacktrace --no-daemon
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      run: |
+        gradle assembleDebug --stacktrace --no-daemon
 
     - name: Upload Debug APK Artifact
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: AdrVision-app-debug
         path: "**/build/outputs/apk/debug/*.apk"
